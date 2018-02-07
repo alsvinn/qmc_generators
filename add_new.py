@@ -84,13 +84,13 @@ Found at %(url)s
 
 To use with Alsvinn, include the following XML under uq/parameters/parameter
 
-    ```.xml
-    <type>dll</type>
-    <library>lib%(name)s.so</library>
-    <create_function>%(name)s_create</create_function>
-    <delete_function>%(name)s_delete</delete_function>
-    <generator_function>%(name)s_generate</generator_function>
-   ```
+```xml
+<type>dll</type>
+<library>lib%(name)s.so</library>
+<create_function>%(name)s_create</create_function>
+<delete_function>%(name)s_delete</delete_function>
+<generator_function>%(name)s_generate</generator_function>
+```
 
 Make sure lib%(name)s.so is available at runtime.
 """ % ({'name': name, 'url' : sys.argv[2]}))
