@@ -4,7 +4,7 @@ Found at http://people.sc.fsu.edu/~jburkardt/cpp_src/latin_center/latin_center.h
 
 To use with Alsvinn, include the following XML under uq/parameters/parameter
 
-    ```.xml
+    ```
     <type>dll</type>
     <library>liblatin_center.so</library>
     <create_function>latin_center_create</create_function>
