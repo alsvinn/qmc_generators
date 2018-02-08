@@ -16,3 +16,13 @@ HALTON_EXPORT double halton_generate(void* data, int size, int dimension, int co
 
 
 }
+
+void *halton_create(int size, int dimension)
+{
+    return NULL;
+}
+
+void halton_delete(void *data)
+{
+    // do nothing
+}
