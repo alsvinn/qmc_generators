@@ -5,7 +5,7 @@
 extern "C" {
 
 
-HALTON_EXPORT double halton409_generate(void* data, int size, int dimension, int component, int sample) {
+HALTON_EXPORT double halton409_large_generate(void* data, int size, int dimension, int component, int sample) {
   // Yes, this is a bit inefficient, but usually, this is not the large time cost
  //   std::cout << "size = " << size << std::endl;
  //   std::cout << "dimension = " << dimension << std::endl;
@@ -18,12 +18,12 @@ HALTON_EXPORT double halton409_generate(void* data, int size, int dimension, int
 
 }
 
-void *halton409_create(int size, int dimension)
+void *halton409_large_create(int size, int dimension)
 {
     return NULL;
 }
 
-void halton409_delete(void *data)
+void halton409_large_delete(void *data)
 {
     // do nothing
 }
