@@ -45,7 +45,7 @@ extern "C" {
         auto output = exec ("./sobol " + std::to_string(size) + " "
                 + std::to_string(dimensions) + " dataset.txt");
 
-        std::ifstream stream(output);
+        std::istringstream stream(output);
         std::vector<double>* points = new std::vector<double>;
         points->reserve(size * dimensions);
 
