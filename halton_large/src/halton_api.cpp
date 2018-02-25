@@ -1,5 +1,5 @@
-#include "qmc/halton_large_api.h"
-#include "qmc/halton_large.hpp"
+#include "qmc/halton_api.h"
+#include "qmc/halton.hpp"
 #include <memory>
 #include <iostream>
 extern "C" {
@@ -10,7 +10,7 @@ HALTON_EXPORT double halton_large_generate(void* data, int size, int dimension, 
  //   std::cout << "dimension = " << dimension << std::endl;
  //   std::cout << "component = " << component << std::endl;
  //   std::cout << "sample = " << sample << std::endl;
-  std::shared_ptr<double> halton_largeSample(halton_large(sample, dimension));
+  std::shared_ptr<double> halton_largeSample(halton(sample, dimension));
   return halton_largeSample.get()[component];
 }
 

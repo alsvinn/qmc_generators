@@ -1,5 +1,5 @@
 #pragma once
-#include "qmc/halton_large_export.h"
+#include "qmc/halton_export.h"
 
 #ifdef __cplusplus
 extern "C" {
