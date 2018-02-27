@@ -5,13 +5,8 @@
 extern "C" {
 
 HALTON_EXPORT double halton_large_generate(void* data, int size, int dimension, int component, int sample) {
-  // Yes, this is a bit inefficient, but usually, this is not the large time cost
- //   std::cout << "size = " << size << std::endl;
- //   std::cout << "dimension = " << dimension << std::endl;
- //   std::cout << "component = " << component << std::endl;
- //   std::cout << "sample = " << sample << std::endl;
-  std::shared_ptr<double> halton_largeSample(halton(sample, dimension));
-  return halton_largeSample.get()[component];
+
+  return ((double*)data)[dimension*sample + component];
 }
 
 
@@ -19,10 +14,10 @@ HALTON_EXPORT double halton_large_generate(void* data, int size, int dimension, 
 
 void *halton_large_create(int size, int dimension)
 {
-    return NULL;
+  return (void*)halton_sequence(0, size, dimension);
 }
 
 void halton_large_delete(void *data)
 {
-    // do nothing
+  delete[] (double*)data;
 }
