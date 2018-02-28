@@ -11,13 +11,13 @@ FAURE_EXPORT double faure_generate(void* data, int size, int dimension,
 
 FAURE_EXPORT void faure_delete(void* data);
 
-FAURE_EXPORT void* faure_large_make_parameters();
+FAURE_EXPORT void* faure_make_parameters();
 
-FAURE_EXPORT void faure_large_set_parameter(void* parameters,
+FAURE_EXPORT void faure_set_parameter(void* parameters,
     const char* name,
     const char* value);
 
-FAURE_EXPORT void faure_large_delete_parameters(void* parameters);
+FAURE_EXPORT void faure_delete_parameters(void* parameters);
 
 #ifdef __cplusplus
 }

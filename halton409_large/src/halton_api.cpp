@@ -11,17 +11,23 @@ void* make_halton_sequence(int size, int dimension) {
     double* halton_sequence = new double[size * dimension];
 
     for (int sample = 0; sample < size; ++sample) {
-        double* halton_sample_vector = halton(409 * sample, dimension);
+        std::unique_ptr<double> halton_sample_vector(halton(409 * sample, dimension));
 
         for (int component = 0; component < dimension; ++component) {
             halton_sequence[sample * dimension + component] =
-                halton_sample_vector[component];
+                halton_sample_vector.get()[component];
         }
-
-        delete[] halton_sample_vector;
     }
 
     return (void*)halton_sequence;
+}
+
+std::string make_buffer_filename(int mpi_node, int mpi_size, int size,
+    int dimension) {
+    return "halton409_cache_" + std::to_string(mpi_node) + "_" + std::to_string(
+            size) + "_" +
+        std::to_string(dimension)
+        + ".bin";
 }
 }
 
@@ -40,12 +46,25 @@ extern "C" {
         if (halton_type == "memory") {
             return ((double*)data)[sample * dimension + component];
         } else {
+
+            // First we find the node that computed it
+            const int mpi_size = std::stoi(parameter_map->at("mpi_size"));
+
+            const int samples_per_node = (size + mpi_size - 1) / mpi_size;
+
+            const int mpi_node = sample / samples_per_node;
+
+            const int sample_start = samples_per_node * mpi_node;
+            const std::string filename = make_buffer_filename(mpi_node, mpi_size,
+                    size, dimension);
+            std::ifstream sequence_file(filename, std::ios::binary);
+
+
             double point;
+            sequence_file.seekg(sizeof(double) * ((sample - sample_start) * dimension +
+                    component));
+            sequence_file.read((char*)&point, sizeof(double));
 
-            std::ifstream sequence_file("halton_sequence.bin", std::ios::binary);
-
-            sequence_file.read((char*)&point,
-                sizeof(double) * (sample * dimension + component));
 
             return point;
         }
@@ -74,23 +93,35 @@ extern "C" {
 
 
             auto mpi_node = std::stoi(parameter_map->at("mpi_node"));
+            auto mpi_size = std::stoi(parameter_map->at("mpi_size"));
 
-            if (mpi_node == 0) {
-                std::ofstream file("halton_sequence.bin", std::ios::out | std::ios::binary);
+            auto output_filename = make_buffer_filename(mpi_node, mpi_size, size,
+                    dimension);
 
-                for (int sample = 0; sample < size; ++sample) {
-                    double* halton_sample_vector = halton(409 * sample, dimension);
+            std::ofstream file(output_filename.c_str(), std::ios::out | std::ios::binary);
+
+            const int samples_per_node = (size + mpi_size - 1) / mpi_size;
+
+            const int sample_start = samples_per_node * mpi_node;
+            const int sample_end = std::min(samples_per_node * (mpi_node + 1), size);
 
 
-                    file.write((char*)halton_sample_vector, sizeof(double)*dimension);
-                }
+            for (int sample = sample_start; sample < sample_end; ++sample) {
+
+                std::unique_ptr<double> halton_sample_vector (halton(409 * sample, dimension));
+
+
+                file.write((char*)halton_sample_vector.get(), sizeof(double)*dimension);
             }
 
-            parameter_map->operator []("halton_type") = "disk";
 
-            return new double[1];
         }
+
+        parameter_map->operator []("halton_type") = "disk";
+
+        return new double[1];
     }
+
 
     void halton409_large_delete(void* data) {
         delete[] (double*)data;

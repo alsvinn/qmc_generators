@@ -19,14 +19,14 @@ extern "C" {
     }
 
 
-    FAURE_EXPORT void* faure_large_make_parameters() {
+    FAURE_EXPORT void* faure_make_parameters() {
         return NULL;
     }
 
-    FAURE_EXPORT void faure_large_set_parameter(void* parameters,
+    FAURE_EXPORT void faure_set_parameter(void* parameters,
         const char* name,
         const char* value) {}
 
-    FAURE_EXPORT void faure_large_delete_parameters(void* parameters) {}
+    FAURE_EXPORT void faure_delete_parameters(void* parameters) {}
 
 }

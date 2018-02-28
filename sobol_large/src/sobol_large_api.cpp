@@ -36,21 +36,46 @@ std::string exec(const std::string& cmd) {
     return result;
 }
 
+std::string make_buffer_filename(int mpi_node, int mpi_size, int size,
+    int dimension) {
+    return "sobol_cache_" + std::to_string(mpi_node) + "_" + std::to_string(
+            size) + "_" +
+        std::to_string(dimension)
+        + ".bin";
+}
 }
 
 extern "C" {
 
-    SOBOL_EXPORT double sobol_large_generate(void* data, int size, int dimension,
-        int component, int sample, void*) {
-        if (size * dimension < SOBOL_SIZE_LIMIT ) {
-            return ((std::vector<double>*)data)->at(sample * dimension + component);
+    SOBOL_EXPORT double sobol_large_generate(void* data, int size, int dimensions,
+        int component, int sample, void* parameters) {
+        if (size * dimensions < SOBOL_SIZE_LIMIT ) {
+            return ((std::vector<double>*)data)->at(sample * dimensions + component);
         } else {
-            std::ifstream input_file(SOBOL_OUTPUT_FILE, std::ios::binary);
+            auto parameter_map = reinterpret_cast<std::map<std::string, std::string>*>
+                (parameters);
+
+            auto mpi_size = std::stoi(parameter_map->at("mpi_size"));
+
+
+            const int dimension_per_node = (dimensions + mpi_size - 1) / mpi_size;
+
+            const int mpi_node = component / dimension_per_node;
+
+            auto input_filename = make_buffer_filename(mpi_node, mpi_size, size,
+                    dimensions);
+
+            const int start_dimension = dimension_per_node * mpi_node;
+
+            std::ifstream input_file(input_filename, std::ios::binary);
+
+
+            input_file.seekg(
+                sizeof(double) * (component - start_dimension)*size + sample);
+
 
             double point;
-
-            input_file.read((char*)&point,
-                sizeof(double) * (sample * dimension + component));
+            input_file.read((char*)&point, sizeof(double));
 
             return point;
         }
@@ -65,6 +90,7 @@ extern "C" {
                 + std::to_string(dimensions) + " dataset.txt";
             auto output = exec (command_to_execute);
 
+
             std::istringstream stream(output);
             std::vector<double>* points = new std::vector<double>;
             points->reserve(size * dimensions);
@@ -75,6 +101,7 @@ extern "C" {
                 points->push_back(point);
             }
 
+
             return (void*)points;
         } else {
             // Now we need the mpi node
@@ -82,15 +109,27 @@ extern "C" {
                 (parameters);
 
 
-
             auto mpi_node = std::stoi(parameter_map->at("mpi_node"));
+            auto mpi_size = std::stoi(parameter_map->at("mpi_size"));
 
-            if (mpi_node == 0) {
-                std::string command_to_execute = "./sobol_binary " + std::to_string(size) + " "
-                    + std::to_string(dimensions) + " dataset.txt";
-                std::system(command_to_execute.c_str());
-            }
 
+            const int dimension_per_node = (dimensions + mpi_size - 1) / mpi_size;
+
+            const int start_dimension = dimension_per_node * mpi_node;
+            const int end_dimension = std::min(dimension_per_node * (mpi_node + 1), size);
+
+
+            auto output_filename = make_buffer_filename(mpi_node, mpi_size, size,
+                    dimensions);
+
+            const std::string command_to_execute = "./sobol_binary "
+                + std::to_string(size) + " "
+                + std::to_string(dimensions) + " "
+                + std::to_string(start_dimension) + " "
+                + std::to_string(end_dimension) + " dataset.txt " +
+                output_filename;
+
+            std::system(command_to_execute.c_str());
             return new std::vector<double>(1);
         }
     }
