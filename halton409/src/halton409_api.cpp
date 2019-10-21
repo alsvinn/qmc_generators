@@ -1,5 +1,5 @@
-#include "qmc/halton_api.h"
-#include "qmc/halton.hpp"
+#include "qmc/halton409_api.h"
+#include "qmc/halton409.hpp"
 #include <memory>
 #include <iostream>
 extern "C" {

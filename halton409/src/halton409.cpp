@@ -6,7 +6,7 @@
 
 using namespace std;
 
-# include "qmc/halton.hpp"
+# include "qmc/halton409.hpp"
 
 //****************************************************************************80
 
