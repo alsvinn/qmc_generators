@@ -1,6 +1,6 @@
 include(GenerateExportHeader)
 
-add_library(halton409 SHARED src/halton.cpp src/halton_api.cpp)
+add_library(halton409 SHARED src/halton409.cpp src/halton409_api.cpp)
 GENERATE_EXPORT_HEADER( halton409
              BASE_NAME halton
              EXPORT_MACRO_NAME HALTON409_EXPORT
